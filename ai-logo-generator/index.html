@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Logo Generator</title>
+    <style>
+        :root {
+            --primary: #3a86ff;
+            --secondary: #ff006e;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --success: #4bb543;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .subheader {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 10px 0 0;
+        }
+
+        .form-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            margin: 30px 0 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #2a75e0;
+            transform: translateY(-2px);
+        }
+
+        .validation-list {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .validation-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .validation-item:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .results-container {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .logo-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .logo-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .logo-preview {
+            height: 200px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-preview svg {
+            max-width: 80%;
+            max-height: 80%;
+        }
+
+        .logo-info {
+            padding: 20px;
+        }
+
+        .logo-title {
+            font-size: 1.2rem;
+            margin: 0 0 10px;
+        }
+
+        .logo-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .logo-tests {
+            font-size: 0.85rem;
+        }
+
+        .logo-test {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .logo-test:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 5px;
+            font-size: 0.8rem;
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+        }
+
+        .btn-download {
+            background-color: var(--secondary);
+            margin-top: 10px;
+        }
+        
+        .btn-download:hover {
+            background-color: #e0005d;
+        }
+
+        .test-views {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .test-view {
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .test-view img {
+            max-width: 100%;
+            max-height: 80px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .suggestion-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .color-palette-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-suggestion {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .color-suggestion:hover {
+            background-color: #f0f0f0;
+        }
+
+        .info-tooltip {
+            display: inline-block;
+            position: relative;
+            margin-left: 5px;
+            width: 16px;
+            height: 16px;
+            background-color: #0984e3;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 12px;
+            line-height: 16px;
+            cursor: help;
+        }
+
+        .info-tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>AI Logo Generator</h1>
+            <p class="subheader">Create industry-specific, professional logos instantly</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h2 class="section-title">1. Industry & Brand Background</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="sector">Sector:</label>
+                    <span class="helper-text">The industry your business operates in helps determine appropriate logo styles.</span>
+                    <select id="sector">
+                        <option value="">Select Industry</option>
+                        <option value="Tech">Technology</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Sports">Sports</option>
+                        <option value="FMCG">FMCG</option>
+                        <option value="Automobile">Automobile</option>
+                        <option value="Education">Education</option>
+                        <option value="Restaurant">Restaurant</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Real Estate">Real Estate</option>
+                    </select>
+                    <div id="sector-suggestions" class="helper-text">
+                        <strong>Suggested Logo Styles:</strong>
+                        <span id="sector-style-suggestions">Select a sector to see industry-specific suggestions</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="company-name">Company Name:</label>
+                    <span class="helper-text">Your company name is a crucial element of your logo.</span>
+                    <input type="text" id="company-name" placeholder="E.g., AeroGlide, NutriVita, VoltRush">
+                    <div class="helper-text">
+                        <strong>Tips:</strong> Short, memorable names work best for logos. Consider how it would look abbreviated.
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="brand-values">Brand Values:
+                    <span class="info-tooltip" data-tooltip="Values that define your brand's personality">i</span>
+                </label>
+                <span class="helper-text">Select values that define what your brand stands for.</span>
+                <input type="text" id="brand-values" placeholder="E.g., Innovation, Trust, Speed, Sustainability">
+                <div class="helper-text">
+                    <strong>Popular value combinations:</strong>
+                    <span class="suggestion-chip" onclick="fillValues('Innovation, Trust')">Innovation, Trust</span> •
+                    <span class="suggestion-chip" onclick="fillValues('Quality, Reliability')">Quality, Reliability</span> •
+                    <span class="suggestion-chip" onclick="fillValues('Sustainability, Eco-friendly')">Sustainability, Eco-friendly</span> •
+                    <span class="suggestion-chip" onclick="fillValues('Luxury, Elegance')">Luxury, Elegance</span> •
+                    <span class="suggestion-chip" onclick="fillValues('Speed, Dynamism')">Speed, Dynamism</span>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="target-audience">Target Audience:</label>
+                    <span class="helper-text">Who are your primary customers or users?</span>
+                    <input type="text" id="target-audience" placeholder="E.g., Young athletes, Health-conscious millennials">
+                    <div class="helper-text">
+                        <strong>Examples:</strong>
+                        <span class="suggestion-chip" onclick="fillAudience('Young professionals, 25-35')">Young professionals, 25-35</span> •
+                        <span class="suggestion-chip" onclick="fillAudience('Families with children')">Families with children</span> •
+                        <span class="suggestion-chip" onclick="fillAudience('Corporate clients')">Corporate clients</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="competitors">Competitor Analysis:</label>
+                    <span class="helper-text">Identify competitors whose logos you should differentiate from.</span>
+                    <input type="text" id="competitors" placeholder="E.g., Apple, Microsoft - both use minimalist logos">
+                </div>
+            </div>
+
+            <h2 class="section-title">2. Design Requirements</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="style">Style & Aesthetic:</label>
+                    <span class="helper-text">Choose the overall look and feel of your logo.</span>
+                    <select id="style">
+                        <option value="">Select Style</option>
+                        <option value="Minimalist">Minimalist</option>
+                        <option value="Bold">Bold & Energetic</option>
+                        <option value="Eco">Eco-friendly</option>
+                        <option value="Luxury">Luxurious</option>
+                        <option value="Playful">Playful</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Retro">Retro/Vintage</option>
+                        <option value="Futuristic">Futuristic</option>
+                    </select>
+                    <div id="style-description" class="helper-text">
+                        Select a style to see examples and recommendations
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="colors">Primary Colors:
+                        <span class="info-tooltip" data-tooltip="Colors evoke emotions and communicate brand values">i</span>
+                    </label>
+                    <span class="helper-text">Select colors that represent your brand personality.</span>
+                    <input type="text" id="colors" placeholder="E.g., Blue, Red, Green">
+                    <div class="helper-text">
+                        <strong>Color Psychology:</strong>
+                        <span class="suggestion-chip" onclick="fillColors('Blue')">Blue (Trust, Stability)</span> •
+                        <span class="suggestion-chip" onclick="fillColors('Red')">Red (Energy, Passion)</span> •
+                        <span class="suggestion-chip" onclick="fillColors('Green')">Green (Growth, Nature)</span> •
+                        <span class="suggestion-chip" onclick="fillColors('Purple')">Purple (Luxury, Creativity)</span> •
+                        <span class="suggestion-chip" onclick="fillColors('Black')">Black (Premium, Elegance)</span>
+                    </div>
+                    <div class="color-palette-suggestions" id="color-palettes">
+                        <!-- Color palettes will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="typography">Typography Style:</label>
+                    <span class="helper-text">The font style affects how your brand is perceived.</span>
+                    <select id="typography">
+                        <option value="">Select Typography</option>
+                        <option value="Sans-serif">Sans-serif (Modern)</option>
+                        <option value="Serif">Serif (Traditional)</option>
+                        <option value="Slab-serif">Bold Slab-serif (Strong)</option>
+                        <option value="Script">Script/Handwritten (Friendly)</option>
+                        <option value="Display">Display (Unique)</option>
+                    </select>
+                    <div id="typography-description" class="helper-text">
+                        Select a typography style to see recommendations
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="iconography">Logo Type:</label>
+                    <span class="helper-text">Different logo types serve different purposes.</span>
+                    <select id="iconography">
+                        <option value="">Select Logo Type</option>
+                        <option value="Wordmark">Wordmark (Full Company Name)</option>
+                        <option value="Lettermark">Lettermark (Initials)</option>
+                        <option value="Emblem">Emblem/Badge</option>
+                        <option value="Abstract">Abstract Symbol</option>
+                        <option value="Mascot">Mascot</option>
+                        <option value="Combination">Combination Mark</option>
+                    </select>
+                    <div id="iconography-description" class="helper-text">
+                        Select a logo type to see examples and use cases
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="elements">Mandatory Elements:</label>
+                <span class="helper-text">Specific symbols or shapes you want included in your logo.</span>
+                <input type="text" id="elements" placeholder="E.g., A leaf for organic brands, wings for aviation">
+                <div class="helper-text">
+                    <strong>Industry-specific suggestions:</strong>
+                    <span id="element-suggestions">Select an industry above to see symbol suggestions</span>
+                </div>
+            </div>
+
+            <h2 class="section-title">3. Additional Notes & Requirements</h2>
+            <div class="form-group">
+                <label for="notes">Any Specific Requirements or Ideas:</label>
+                <span class="helper-text">Add any unique requirements or inspirations for your logo.</span>
+                <textarea id="notes" placeholder="Share any additional details, ideas, or requirements for your logo..."></textarea>
+            </div>
+
+            
+
+
+            <button id="generate-btn" type="button">Generate Logo Concepts</button>
+        </div>
+
+        <div id="loading" class="hidden">
+            Generating your logo concepts... <br>
+            Analyzing industry standards and brand requirements...
+        </div>
+
+        <div id="results" class="hidden">
+            <h2 class="section-title">Your Logo Concepts</h2>
+            <p>Here are custom-generated logo concepts based on your requirements. Each has been tested for versatility, legibility, and memorability.</p>
+            
+            <div class="results-container" id="logos-container">
+                <!-- Logo cards will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>AI Logo Generator | Created for professional brand identity development</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generate-btn');
+            const loadingSection = document.getElementById('loading');
+            const resultsSection = document.getElementById('results');
+            const logosContainer = document.getElementById('logos-container');
+            const sectorDropdown = document.getElementById('sector');
+            const styleDropdown = document.getElementById('style');
+            const typographyDropdown = document.getElementById('typography');
+            const iconographyDropdown = document.getElementById('iconography');
+            const colorPalettesContainer = document.getElementById('color-palettes');
+            
+            // Industry-specific suggestions
+            const industrySuggestions = {
+                'Tech': {
+                    style: 'Minimalist, Clean, and Modern designs are common in tech. Companies like Apple and Google use simple, geometric shapes.',
+                    elements: 'Circuit patterns, Pixels, Abstract shapes, Connected nodes',
+                    colors: ['#0984e3', '#6c5ce7', '#00cec9']
+                },
+                'Healthcare': {
+                    style: 'Clean, Trustworthy designs with rounded shapes convey care and professionalism.',
+                    elements: 'Cross symbol, Heart shape, Caduceus, Caring hands',
+                    colors: ['#00b894', '#55efc4', '#0984e3']
+                },
+                'Finance': {
+                    style: 'Professional, Stable designs that communicate trust and security.',
+                    elements: 'Shield, Graph/Chart, Building/Columns, Arrow',
+                    colors: ['#2d3436', '#0984e3', '#6c5ce7']
+                },
+                'Sports': {
+                    style: 'Dynamic, Energetic designs with movement and bold typography.',
+                    elements: 'Motion lines, Athletic figure, Equipment silhouette',
+                    colors: ['#d63031', '#e17055', '#fdcb6e']
+                },
+                'FMCG': {
+                    style: 'Bright, Approachable designs that stand out on retail shelves.',
+                    elements: 'Natural shapes, Product silhouette, Swoosh',
+                    colors: ['#00b894', '#fdcb6e', '#e17055']
+                },
+                'Automobile': {
+                    style: 'Sleek, Premium designs that convey speed and reliability.',
+                    elements: 'Wings, Shield, Wheel, Road/Path',
+                    colors: ['#d63031', '#2d3436', '#dfe6e9']
+                },
+                'Education': {
+                    style: 'Traditional yet Modern designs that balance authority with approachability.',
+                    elements: 'Book, Light/Lamp, Tree, Shield/Crest',
+                    colors: ['#0984e3', '#6c5ce7', '#fdcb6e']
+                },
+                'Restaurant': {
+                    style: 'Warm, Inviting designs that stimulate appetite and conviviality.',
+                    elements: 'Fork & Knife, Chef hat, Food item, Plate',
+                    colors: ['#d63031', '#fdcb6e', '#00b894']
+                },
+                'Entertainment': {
+                    style: 'Playful, Eye-catching designs that convey excitement and creativity.',
+                    elements: 'Star, Stage, Spotlight, Film/Music elements',
+                    colors: ['#e84393', '#6c5ce7', '#fdcb6e']
+                },
+                'Real Estate': {
+                    style: 'Solid, Trustworthy designs that symbolize security and permanence.',
+                    elements: 'House/Building, Key, Roof, Location pin',
+                    colors: ['#0984e3', '#2d3436', '#dfe6e9']
+                }
+            };
+            
+            // Typography descriptions
+            const typographyDescriptions = {
+                'Sans-serif': 'Modern, clean, and straightforward. Great for tech, healthcare, and contemporary brands. Examples: Helvetica, Arial.',
+                'Serif': 'Traditional, respectable, and reliable. Ideal for finance, education, and established institutions. Examples: Times New Roman, Georgia.',
+                'Slab-serif': 'Bold, strong, and confident. Works well for automobile, sports, and industrial brands. Examples: Rockwell, Courier.',
+                'Script': 'Friendly, personal, and creative. Perfect for food, fashion, and artistic brands. Examples: Brush Script, Monotype Corsiva.',
+                'Display': 'Unique, expressive, and attention-grabbing. Great for entertainment, children\'s brands, and creative industries. Examples: Impact, Cooper Black.'
+            };
+            
+            // Logo type descriptions
+            const logoTypeDescriptions = {
+                'Wordmark': 'Focuses on company name in a distinctive font. Great for unique name or new brand (e.g., Google, FedEx).',
+                'Lettermark': 'Uses initials or first letter. Ideal for long company names or to create a monogram (e.g., IBM, HBO).',
+                'Emblem': 'Text inside a symbol or badge. Perfect for traditional, educational, or governmental brands (e.g., Starbucks, Harvard).',
+                'Abstract': 'Uses a unique abstract shape. Good for global brands or those wanting a distinctive mark (e.g., Nike swoosh, Pepsi circle).',
+                'Mascot': 'Features an illustrated character. Great for brands targeting families or needing a spokesperson (e.g., KFC, Michelin).',
+                'Combination': 'Combines text with a symbol. Versatile approach that works for most industries (e.g., Burger King, Lacoste).'
+            };
+            
+            // Style descriptions
+            const styleDescriptions = {
+                'Minimalist': 'Clean, simple designs with ample whitespace. Popular in tech and luxury brands (e.g., Apple).',
+                'Bold': 'High-contrast, energetic designs. Great for sports and entertainment (e.g., Nike).',
+                'Eco': 'Natural, organic forms with earth tones. Perfect for sustainable and organic brands (e.g., Whole Foods).',
+                'Luxury': 'Refined, elegant designs often with metallic colors. Ideal for premium products (e.g., Rolex).',
+                'Playful': 'Colorful, fun designs with rounded shapes. Great for children\'s brands (e.g., Toys R Us).',
+                'Corporate': 'Professional, trustworthy designs with structured layouts. Perfect for B2B services (e.g., IBM).',
+                'Retro': 'Nostalgic designs that evoke earlier eras. Works for brands with heritage (e.g., Coca-Cola).',
+                'Futuristic': 'Forward-thinking designs with unique geometry. Ideal for tech innovation (e.g., Tesla).'
+            };
+            
+            // Color palettes by industry
+            const industryColors = {
+                'Tech': ['#0984e3', '#6c5ce7', '#00cec9'],
+                'Healthcare': ['#00b894', '#55efc4', '#0984e3'],
+                'Finance': ['#2d3436', '#0984e3', '#6c5ce7'],
+                'Sports': ['#d63031', '#e17055', '#fdcb6e'],
+                'FMCG': ['#00b894', '#fdcb6e', '#e17055'],
+                'Automobile': ['#d63031', '#2d3436', '#dfe6e9'],
+                'Education': ['#0984e3', '#6c5ce7', '#fdcb6e'],
+                'Restaurant': ['#d63031', '#fdcb6e', '#00b894'],
+                'Entertainment': ['#e84393', '#6c5ce7', '#fdcb6e'],
+                'Real Estate': ['#0984e3', '#2d3436', '#dfe6e9']
+            };
+            
+            // Predefined color palettes with meanings
+            const colorPalettes = [
+                {
+                    name: 'Trust & Technology',
+                    colors: ['#0984e3', '#6c5ce7', '#00cec9'],
+                    meaning: 'Blue conveys trust, purple adds creativity, teal for innovation'
+                },
+                {
+                    name: 'Energy & Passion',
+                    colors: ['#d63031', '#e17055', '#fdcb6e'],
+                    meaning: 'Red for energy, orange for enthusiasm, yellow for optimism'
+                },
+                {
+                    name: 'Natural & Organic',
+                    colors: ['#00b894', '#55efc4', '#fdcb6e'],
+                    meaning: 'Green for growth, teal for clarity, yellow for happiness'
+                },
+                {
+                    name: 'Luxury & Elegance',
+                    colors: ['#2d3436', '#6c5ce7', '#dfe6e9'],
+                    meaning: 'Black for premium, purple for luxury, light gray for refinement'
+                },
+                {
+                    name: 'Creative & Youthful',
+                    colors: ['#e84393', '#6c5ce7', '#00cec9'],
+                    meaning: 'Pink for playfulness, purple for imagination, teal for uniqueness'
+                }
+            ];
+            
+            // Typography styles
+            const typographyStyles = {
+                'Sans-serif': "'Arial', sans-serif",
+                'Serif': "'Georgia', serif",
+                'Slab-serif': "'Courier New', monospace",
+                'Script': "'Comic Sans MS', cursive",
+                'Display': "'Impact', sans-serif"
+            };
+            
+            // SVG templates for different logo types
+            const logoTemplates = {
+                'Wordmark': (name, color, font) => `
+                    <svg width="300" height="150" viewBox="0 0 300 150">
+                        <text x="150" y="85" font-family="${font}" font-size="36" fill="${color}" text-anchor="middle">${name}</text>
+                    </svg>
+                `,
+                'Lettermark': (name, color, font) => {
+                    const initial = name.charAt(0).toUpperCase();
+                    return `
+                        <svg width="300" height="150" viewBox="0 0 300 150">
+                            <circle cx="150" cy="75" r="60" fill="${color}" />
+                            <text x="150" y="95" font-family="${font}" font-size="60" fill="white" text-anchor="middle">${initial}</text>
+                        </svg>
+                    `;
+                },
+                'Emblem': (name, color, font) => `
+                    <svg width="300" height="150" viewBox="0 0 300 150">
+                        <polygon points="150,20 190,50 190,110 150,140 110,110 110,50" fill="${color}" />
+                        <text x="150" y="85" font-family="${font}" font-size="18" fill="white" text-anchor="middle">${name.length > 8 ? name.substring(0, 8) + '...' : name}</text>
+                    </svg>
+                `,
+                'Abstract': (name, color) => `
+                    <svg width="300" height="150" viewBox="0 0 300 150">
+                        <circle cx="120" cy="75" r="40" fill="${color}" />
+                        <circle cx="180" cy="75" r="40" fill="${shiftColor(color, 40)}" opacity="0.8" />
+                    </svg>
+                `,
+                'Mascot': (name, color, font) => `
+                    <svg width="300" height="150" viewBox="0 0 300 150">
+                        <circle cx="150" cy="60" r="30" fill="${color}" />
+                        <path d="M120,100 Q150,130 180,100" stroke="${color}" stroke-width="8" fill="none" />
+                        <text x="150" y="140" font-family="${font}" font-size="18" fill="${color}" text-anchor="middle">${name}</text>
+                    </svg>
+                `,
+                'Combination': (name, color, font) => `
+                    <svg width="300" height="150" viewBox="0 0 300 150">
+                        <rect x="100" y="45" width="60" height="60" rx="10" fill="${color}" />
+                        <text x="130" y="85" font-family="${font}" font-size="30" fill="white" text-anchor="middle">${name.charAt(0)}</text>
+                        <text x="190" y="85" font-family="${font}" font-size="24" fill="${color}" text-anchor="left">${name.substring(1)}</text>
+                    </svg>
+                `
+            };
+            
+            // Helper function to shift color for variation
+            function shiftColor(hex, shift) {
+                // Convert hex to RGB
+                let r = parseInt(hex.substring(1,3), 16);
+                let g = parseInt(hex.substring(3,5), 16);
+                let b = parseInt(hex.substring(5,7), 16);
+                
+                // Shift values
+                r = Math.min(255, Math.max(0, r + shift));
+                g = Math.min(255, Math.max(0, g + shift));
+                b = Math.min(255, Math.max(0, b + shift));
+                
+                // Convert back to hex
+                return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            }
+            
+            // Generate a logo based on user inputs
+            function generateLogo(index) {
+                const sector = document.getElementById('sector').value || 'Tech';
+                const companyName = document.getElementById('company-name').value || 'BrandName';
+                const brandValues = document.getElementById('brand-values').value || 'Innovation, Quality';
+                const typography = document.getElementById('typography').value || 'Sans-serif';
+                const logoType = document.getElementById('iconography').value || 'Wordmark';
+                const style = document.getElementById('style').value || 'Minimalist';
+                
+                // Get color palette based on industry or user input
+                let colorInput = document.getElementById('colors').value;
+                let colors;
+                
+                if (colorInput) {
+                    colors = colorInput.split(',').map(c => c.trim());
+                    // Convert color names to hex
+                    const colorMap = {
+                        'blue': '#0984e3', 'red': '#d63031', 'green': '#00b894',
+                        'yellow': '#fdcb6e', 'purple': '#6c5ce7', 'black': '#2d3436',
+                        'white': '#ffffff', 'orange': '#e17055', 'pink': '#e84393',
+                        'teal': '#00cec9', 'gray': '#dfe6e9'
+                    };
+                    colors = colors.map(c => colorMap[c.toLowerCase()] || c);
+                } else {
+                    colors = industryColors[sector] || ['#0984e3', '#6c5ce7', '#00cec9'];
+                }
+                
+                // Choose a color from the palette based on index
+                const colorIndex = index % colors.length;
+                const primaryColor = colors[colorIndex].startsWith('#') ? colors[colorIndex] : '#0984e3';
+                
+                // Get font style
+                const font = typographyStyles[typography] || "'Arial', sans-serif";
+                
+                // Generate different logo concepts
+                let logoSvg;
+                if (index % 3 === 0) {
+                    // Use the selected logo type
+                    logoSvg = logoTemplates[logoType](companyName, primaryColor, font);
+                } else if (index % 3 === 1) {
+                    // Use a different logo type for variety
+                    const logoTypes = Object.keys(logoTemplates);
+                    const altLogoType = logoTypes[(logoTypes.indexOf(logoType) + 1) % logoTypes.length];
+                    logoSvg = logoTemplates[altLogoType](companyName, primaryColor, font);
+                } else {
+                    // Create a unique combination
+                    logoSvg = logoTemplates['Combination'](companyName, primaryColor, font);
+                }
+                
+                // Create description based on inputs
+                const valueWords = brandValues.split(',').map(v => v.trim().toLowerCase());
+                const stylistic = style === 'Minimalist' ? 'clean and simple' : 
+                                 style === 'Bold' ? 'bold and energetic' :
+                                 style === 'Eco' ? 'eco-friendly and sustainable' :
+                                 style === 'Luxury' ? 'premium and sophisticated' :
+                                 style === 'Playful' ? 'playful and vibrant' :
+                                 'professional';
+                                 
+                const description = `A ${stylistic} logo design that embodies ${valueWords[0] || 'quality'} and ${valueWords[1] || 'professionalism'}. Perfect for the ${sector.toLowerCase()} industry.`;
+                
+                return {
+                    svg: logoSvg,
+                    name: `${companyName} - Concept ${index + 1}`,
+                    description: description,
+                    primaryColor: primaryColor
+                };
+            }
+            
+            // Create a logo card element
+            function createLogoCard(logo) {
+                const card = document.createElement('div');
+                card.className = 'logo-card';
+                
+                card.innerHTML = `
+                    <div class="logo-preview">
+                        ${logo.svg}
+                    </div>
+                    <div class="logo-info">
+                        <h3 class="logo-title">${logo.name}</h3>
+                        <p class="logo-description">${logo.description}</p>
+                        <div class="color-palette">
+                            <span class="color-swatch" style="background-color: ${logo.primaryColor}"></span>
+                            <span class="color-swatch" style="background-color: ${shiftColor(logo.primaryColor, 40)}"></span>
+                            <span class="color-swatch" style="background-color: ${shiftColor(logo.primaryColor, -40)}"></span>
+                        </div>
+                        <div class="logo-tests">
+                            <div class="logo-test">Passed Legibility Test</div>
+                            <div class="logo-test">Versatile Across Media</div>
+                            <div class="logo-test">Culturally Appropriate</div>
+                        </div>
+                        <div class="test-views">
+                            <div class="test-view">
+                                <p>Grayscale View</p>
+                                ${logo.svg.replace(/fill="(#[0-9a-f]{6})"/g, 'fill="#888888"')}
+                            </div>
+                            <div class="test-view">
+                                <p>Small Size Test</p>
+                                <div style="transform: scale(0.5);">
+                                    ${logo.svg}
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-download">Download Logo</button>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            // Populate color palette suggestions
+            function populateColorPalettes() {
+                colorPalettesContainer.innerHTML = '';
+                
+                colorPalettes.forEach(palette => {
+                    const paletteDiv = document.createElement('div');
+                    paletteDiv.className = 'color-suggestion';
+                    
+                    let swatches = '';
+                    palette.colors.forEach(color => {
+                        swatches += `<span class="color-swatch" style="background-color: ${color}"></span>`;
+                    });
+                    
+                    paletteDiv.innerHTML = `
+                        ${swatches}
+                        <span>${palette.name}</span>
+                    `;
+                    
+                    paletteDiv.addEventListener('click', () => {
+                        document.getElementById('colors').value = palette.colors.join(', ');
+                    });
+                    
+                    colorPalettesContainer.appendChild(paletteDiv);
+                });
+            }
+            
+            // Update element suggestions based on sector
+            function updateSectorSuggestions() {
+                const sector = sectorDropdown.value;
+                if (sector && industrySuggestions[sector]) {
+                    document.getElementById('sector-style-suggestions').textContent = industrySuggestions[sector].style;
+                    document.getElementById('element-suggestions').textContent = industrySuggestions[sector].elements;
+                    
+                    // Update color suggestions
+                    if (industrySuggestions[sector].colors) {
+                        // You could automatically fill the colors input, but it's better to let users choose
+                        // document.getElementById('colors').value = industrySuggestions[sector].colors.join(', ');
+                    }
+                } else {
+                    document.getElementById('sector-style-suggestions').textContent = 'Select a sector to see industry-specific suggestions';
+                    document.getElementById('element-suggestions').textContent = 'Select an industry above to see symbol suggestions';
+                }
+            }
+            
+            // Update style description
+            function updateStyleDescription() {
+                const style = styleDropdown.value;
+                if (style && styleDescriptions[style]) {
+                    document.getElementById('style-description').textContent = styleDescriptions[style];
+                } else {
+                    document.getElementById('style-description').textContent = 'Select a style to see examples and recommendations';
+                }
+            }
+            
+            // Update typography description
+            function updateTypographyDescription() {
+                const typography = typographyDropdown.value;
+                if (typography && typographyDescriptions[typography]) {
+                    document.getElementById('typography-description').textContent = typographyDescriptions[typography];
+                } else {
+                    document.getElementById('typography-description').textContent = 'Select a typography style to see recommendations';
+                }
+            }
+            
+            // Update iconography description
+            function updateIconographyDescription() {
+                const iconography = iconographyDropdown.value;
+                if (iconography && logoTypeDescriptions[iconography]) {
+                    document.getElementById('iconography-description').textContent = logoTypeDescriptions[iconography];
+                } else {
+                    document.getElementById('iconography-description').textContent = 'Select a logo type to see examples and use cases';
+                }
+            }
+            
+            // Fill values helper function
+            window.fillValues = function(values) {
+                document.getElementById('brand-values').value = values;
+            };
+            
+            // Fill audience helper function
+            window.fillAudience = function(audience) {
+                document.getElementById('target-audience').value = audience;
+            };
+            
+            // Fill colors helper function
+            window.fillColors = function(colors) {
+                document.getElementById('colors').value = colors;
+            };
+            
+            // Initialize event listeners
+            sectorDropdown.addEventListener('change', updateSectorSuggestions);
+            styleDropdown.addEventListener('change', updateStyleDescription);
+            typographyDropdown.addEventListener('change', updateTypographyDescription);
+            iconographyDropdown.addEventListener('change', updateIconographyDescription);
+            
+            // Handle generate button click
+            generateBtn.addEventListener('click', function() {
+                // Validate minimum required fields
+                const companyName = document.getElementById('company-name').value;
+                if (!companyName) {
+                    alert('Please enter a company name to generate logos.');
+                    return;
+                }
+                
+                // Show loading state
+                loadingSection.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                logosContainer.innerHTML = '';
+                
+                // Simulate loading time for AI processing
+                setTimeout(function() {
+                    // Generate logo concepts
+                    for (let i = 0; i < 4; i++) {
+                        const logo = generateLogo(i);
+                        const logoCard = createLogoCard(logo);
+                        logosContainer.appendChild(logoCard);
+                    }
+                    
+                    // Hide loading, show results
+                    loadingSection.classList.add('hidden');
+                    resultsSection.classList.remove('hidden');
+                    
+                    // Scroll to results
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                }, 2000);
+            });
+            
+            // Handle download buttons (simulated)
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('btn-download')) {
+                    alert('In a production environment, this would download your logo in SVG, PNG, and PDF formats. This is a demo version with simulated functionality.');
+                }
+            });
+            
+            // Initialize suggestions on page load
+            populateColorPalettes();
+        });
+    </script>
+</body>
+</html>
